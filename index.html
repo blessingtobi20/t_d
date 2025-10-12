@@ -1,84 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UI/UX Designer Portfolio</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truth or Dare Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px #ff0080, 0 0 20px #7928ca;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff0080; }
+      to { text-shadow: 0 0 25px #7928ca, 0 0 30px #ff0080; }
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 15px 35px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(45deg, #ff0080, #7928ca);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(255, 0, 128, 0.6);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(255, 0, 128, 0.9);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .card {
+      width: 80%;
+      max-width: 500px;
+      min-height: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      font-size: 1.3rem;
+      animation: fadeIn 0.5s ease;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.9rem;
+      opacity: 0.6;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <section id="home">
-        <div class="intro">
-            <h1>Welcome to My Portfolio</h1>
-            <p>UI/UX Designer &amp; Creative Thinker</p>
-        </div>
-    </section>
-
-    <section id="about">
-        <h2>About Me</h2>
-        <p>Passionate UI/UX Designer with experience in creating user-friendly interfaces.</p>
-    </section>
-
-    <section id="portfolio">
-        <h2>My Work</h2>
-        <div class="portfolio-grid">
-            <div class="portfolio-item" data-modal-target="#modal1">
-                <img src="project1.jpg" alt="Project 1">
-                <h3>Project 1</h3>
-                <p>Brief description of Project 1.</p>
-            </div>
-            <div class="portfolio-item" data-modal-target="#modal2">
-                <img src="project2.jpg" alt="Project 2">
-                <h3>Project 2</h3>
-                <p>Brief description of Project 2.</p>
-            </div>
-            <!-- Add more portfolio items as needed -->
-        </div>
-    </section>
-
-    <section id="contact">
-        <h2>Contact Me</h2>
-        <form>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email">
-            <label for="message">Message:</label>
-            <textarea id="message" name="message"></textarea>
-            <button type="submit">Send</button>
-        </form>
-    </section>
-
-    <!-- Modals -->
-    <div class="modal" id="modal1">
-        <div class="modal-content">
-            <span class="close-button" data-close-button>&times;</span>
-            <h2>Project 1</h2>
-            <p>Detailed description of Project 1, including the design process, challenges faced, and final outcome.</p>
-        </div>
+  <!-- Mode selection screen -->
+  <div id="modeScreen">
+    <h1>Truth or Dare 🎯</h1>
+    <p style="margin-bottom: 20px;">Choose your game mode</p>
+    <div class="buttons">
+      <button id="everyoneBtn">Everyone 👨‍👩‍👧‍👦</button>
+      <button id="adultBtn">18+ 🔥</button>
     </div>
+  </div>
 
-    <div class="modal" id="modal2">
-        <div class="modal-content">
-            <span class="close-button" data-close-button>&times;</span>
-            <h2>Project 2</h2>
-            <p>Detailed description of Project 2, including the design process, challenges faced, and final outcome.</p>
-        </div>
+  <!-- Main game screen -->
+  <div id="gameScreen" class="hidden">
+    <h1>Truth or Dare</h1>
+    <div class="buttons">
+      <button id="truthBtn">Truth 😏</button>
+      <button id="dareBtn">Dare 😈</button>
+      <button id="backBtn">⬅ Change Mode</button>
     </div>
+    <div class="card" id="result">Click a button to begin!</div>
+  </div>
 
-    <div id="overlay"></div>
+  <div class="footer">Play with friends and have fun 🎉</div>
 
-    <script src="script.js"></script>
+  <script>
+    let rating = "pg"; // default mode
+    const modeScreen = document.getElementById("modeScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const truthBtn = document.getElementById("truthBtn");
+    const dareBtn = document.getElementById("dareBtn");
+    const backBtn = document.getElementById("backBtn");
+    const result = document.getElementById("result");
+
+    document.getElementById("everyoneBtn").addEventListener("click", () => {
+      rating = "pg";
+      modeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+    });
+
+    document.getElementById("adultBtn").addEventListener("click", () => {
+      rating = "r";
+      modeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+    });
+
+    backBtn.addEventListener("click", () => {
+      gameScreen.classList.add("hidden");
+      modeScreen.classList.remove("hidden");
+      result.innerHTML = "Click a button to begin!";
+    });
+
+    async function getTruth() {
+      const res = await fetch(`https://api.truthordarebot.xyz/v1/truth?rating=${rating}`);
+      const data = await res.json();
+      return data.question;
+    }
+
+    async function getDare() {
+      const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
+      const data = await res.json();
+      return data.question;
+    }
+
+    truthBtn.addEventListener("click", async () => {
+      disableButtons();
+      result.innerHTML = "Fetching a truth... 🤔";
+      const question = await getTruth();
+      result.innerHTML = `<strong>Truth:</strong> ${question}`;
+      enableButtons();
+    });
+
+    dareBtn.addEventListener("click", async () => {
+      disableButtons();
+      result.innerHTML = "Fetching a dare... 😜";
+      const question = await getDare();
+      result.innerHTML = `<strong>Dare:</strong> ${question}`;
+      enableButtons();
+    });
+
+    function disableButtons() {
+      truthBtn.disabled = true;
+      dareBtn.disabled = true;
+    }
+
+    function enableButtons() {
+      setTimeout(() => {
+        truthBtn.disabled = false;
+        dareBtn.disabled = false;
+      }, 2000);
+    }
+  </script>
 </body>
 </html>
