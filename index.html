@@ -161,10 +161,18 @@
     }
 
     async function getDare() {
-      const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
-      const data = await res.json();
-      return data.question;
-    }
+  // Fetch a dare from the API
+  const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
+  const data = await res.json();
+  const apiDare = data.question;
+
+  // Combine API dare with custom dares
+  const allDares = [...customDares, apiDare];
+
+  // Pick a random dare from the combined list
+  const randomIndex = Math.floor(Math.random() * allDares.length);
+  return allDares[randomIndex];
+}
 
     truthBtn.addEventListener("click", async () => {
       disableButtons();
