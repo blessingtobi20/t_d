@@ -1,0 +1,20 @@
+{
+  "name": "truth-or-dare",
+  "version": "1.0.0",
+  "description": "A fun Truth or Dare game",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 5000 --bind 0.0.0.0",
+    "start": "python3 -m http.server 5000 --bind 0.0.0.0"
+  },
+  "keywords": [
+    "game",
+    "truth",
+    "dare"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^12.7.0"
+  }
+}
