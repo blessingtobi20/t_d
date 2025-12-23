@@ -1,185 +1,183 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Truth or Dare</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Truth or Dare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #1a1a2e;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-    }
-    button {
-      padding: 12px 25px;
-      margin: 10px;
-      border: none;
-      border-radius: 20px;
-      background: #ff0080;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:disabled {
-      opacity: 0.5;
-    }
-    .card {
-      margin-top: 20px;
-      padding: 20px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 15px;
-      max-width: 400px;
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
-</head>
-<body>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #1a1a2e;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+      }
+      button {
+        padding: 12px 25px;
+        margin: 10px;
+        border: none;
+        border-radius: 20px;
+        background: #ff0080;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+      }
+      .card {
+        margin-top: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        max-width: 400px;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="modeScreen">
+      <h1>Truth or Dare</h1>
+      <button id="everyoneBtn">Everyone</button>
+      <button id="adultBtn">18+</button>
+    </div>
 
-<div id="modeScreen">
-  <h1>Truth or Dare</h1>
-  <button id="everyoneBtn">Everyone</button>
-  <button id="adultBtn">18+</button>
-</div>
+    <div id="gameScreen" class="hidden">
+      <h1>Truth or Dare</h1>
+      <button id="truthBtn">Truth</button>
+      <button id="dareBtn">Dare</button>
+      <button id="backBtn">Change Mode</button>
+      <div class="card" id="result">Waiting...</div>
+    </div>
 
-<div id="gameScreen" class="hidden">
-  <h1>Truth or Dare</h1>
-  <button id="truthBtn">Truth</button>
-  <button id="dareBtn">Dare</button>
-  <button id="backBtn">Change Mode</button>
-  <div class="card" id="result">Waiting...</div>
-</div>
+    <script>
+      /* ===============================
+         🔥 FIREBASE CONFIG (REPLACE)
+      ================================ */
+      const firebaseConfig = {
+        ,
+        authDomain: "t-or-d-b3a7a.firebaseapp.com",
+        projectId: "t-or-d-b3a7a",
+        storageBucket: "t-or-d-b3a7a.firebasestorage.app",
+        messagingSenderId: "191762740910",
+        appId: "1:191762740910:web:24e2510f58d3df22fd9f3f",
+        measurementId: "G-34SLQN5HYE"
+      };
 
-<script>
-/* ===============================
-   🔥 FIREBASE CONFIG (REPLACE)
-================================ */
-const firebaseConfig = {
-  ,
-  authDomain: "t-or-d-b3a7a.firebaseapp.com",
-  projectId: "t-or-d-b3a7a",
-  storageBucket: "t-or-d-b3a7a.firebasestorage.app",
-  messagingSenderId: "191762740910",
-  appId: "1:191762740910:web:24e2510f58d3df22fd9f3f",
-  measurementId: "G-34SLQN5HYE"
-};
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+      /* ===============================
+         🎯 YOUR OWN QUESTIONS
+         (EDIT THESE)
+      ================================ */
+      const customTruths = [
+        "What is your favorite hobby?",
+        "What makes you really happy?",
+        "What is one goal you have?"
+      ];
 
-/* ===============================
-   🎯 YOUR OWN QUESTIONS
-   (EDIT THESE)
-================================ */
-const customTruths = [
-  "What is your favorite hobby?",
-  "What makes you really happy?",
-  "What is one goal you have?"
-];
+      const customDares = [
+        "Do 5 jumping jacks",
+        "Smile for 10 seconds",
+        "Say something nice about someone"
+      ];
 
-const customDares = [
-  "Do 5 jumping jacks",
-  "Smile for 10 seconds",
-  "Say something nice about someone"
-];
+      /* ===============================
+         🧠 GAME LOGIC
+      ================================ */
+      let rating = "pg";
 
-/* ===============================
-   🧠 GAME LOGIC
-================================ */
-let rating = "pg";
+      const modeScreen = document.getElementById("modeScreen");
+      const gameScreen = document.getElementById("gameScreen");
+      const result = document.getElementById("result");
 
-const modeScreen = document.getElementById("modeScreen");
-const gameScreen = document.getElementById("gameScreen");
-const result = document.getElementById("result");
+      document.getElementById("everyoneBtn").onclick = () => {
+        db.ref("game").set({ mode: "pg" });
+      };
 
-document.getElementById("everyoneBtn").onclick = () => {
-  db.ref("game").set({ mode: "pg" });
-};
+      document.getElementById("adultBtn").onclick = () => {
+        db.ref("game").set({ mode: "r" });
+      };
 
-document.getElementById("adultBtn").onclick = () => {
-  db.ref("game").set({ mode: "r" });
-};
+      document.getElementById("backBtn").onclick = () => {
+        db.ref("game").remove();
+        gameScreen.classList.add("hidden");
+        modeScreen.classList.remove("hidden");
+      };
 
-document.getElementById("backBtn").onclick = () => {
-  db.ref("game").remove();
-  gameScreen.classList.add("hidden");
-  modeScreen.classList.remove("hidden");
-};
+      /* ===============================
+         📡 REAL-TIME LISTENERS
+      ================================ */
+      db.ref("game/mode").on("value", snap => {
+        if (!snap.exists()) return;
+        rating = snap.val();
+        modeScreen.classList.add("hidden");
+        gameScreen.classList.remove("hidden");
+      });
 
-/* ===============================
-   📡 REAL-TIME LISTENERS
-================================ */
-db.ref("game/mode").on("value", snap => {
-  if (!snap.exists()) return;
-  rating = snap.val();
-  modeScreen.classList.add("hidden");
-  gameScreen.classList.remove("hidden");
-});
+      db.ref("game/current").on("value", snap => {
+        if (!snap.exists()) return;
+        const data = snap.val();
+        result.innerHTML = `<strong>${data.type}:</strong> ${data.text}`;
+      });
 
-db.ref("game/current").on("value", snap => {
-  if (!snap.exists()) return;
-  const data = snap.val();
-  result.innerHTML = `<strong>${data.type}:</strong> ${data.text}`;
-});
+      /* ===============================
+         🌐 API FALLBACK
+      ================================ */
+      async function getApiTruth() {
+        const res = await fetch(`https://api.truthordarebot.xyz/v1/truth?rating=${rating}`);
+        const data = await res.json();
+        return data.question;
+      }
 
-/* ===============================
-   🌐 API FALLBACK
-================================ */
-async function getApiTruth() {
-  const res = await fetch(`https://api.truthordarebot.xyz/v1/truth?rating=${rating}`);
-  const data = await res.json();
-  return data.question;
-}
+      async function getApiDare() {
+        const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
+        const data = await res.json();
+        return data.question;
+      }
 
-async function getApiDare() {
-  const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
-  const data = await res.json();
-  return data.question;
-}
+      /* ===============================
+         🖱 BUTTON ACTIONS
+      ================================ */
+      document.getElementById("truthBtn").onclick = async () => {
+        let question;
+        if (customTruths.length > 0) {
+          question = customTruths.shift(); // use your own first
+        } else {
+          question = await getApiTruth();
+        }
 
-/* ===============================
-   🖱 BUTTON ACTIONS
-================================ */
-document.getElementById("truthBtn").onclick = async () => {
-  let question;
-  if (customTruths.length > 0) {
-    question = customTruths.shift(); // use your own first
-  } else {
-    question = await getApiTruth();
-  }
+        db.ref("game/current").set({
+          type: "Truth",
+          text: question
+        });
+      };
 
-  db.ref("game/current").set({
-    type: "Truth",
-    text: question
-  });
-};
+      document.getElementById("dareBtn").onclick = async () => {
+        let question;
+        if (customDares.length > 0) {
+          question = customDares.shift(); // use your own first
+        } else {
+          question = await getApiDare();
+        }
 
-document.getElementById("dareBtn").onclick = async () => {
-  let question;
-  if (customDares.length > 0) {
-    question = customDares.shift(); // use your own first
-  } else {
-    question = await getApiDare();
-  }
-
-  db.ref("game/current").set({
-    type: "Dare",
-    text: question
-  });
-};
-</script>
-
-</body>
+        db.ref("game/current").set({
+          type: "Dare",
+          text: question
+        });
+      };
+    </script>
+  </body>
 </html>
