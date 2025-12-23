@@ -155,32 +155,45 @@
     });
 
     async function getTruth() {
-      const res = await fetch(`https://api.truthordarebot.xyz/v1/truth?rating=${rating}`);
-      const data = await res.json();
-      return data.question;
+      try {
+        const res = await fetch(`https://api.truthordarebot.xyz/api/truth?rating=${rating}&_=${Date.now()}`);
+        const data = await res.json();
+        return data.question || "No question available.";
+      } catch (err) {
+        console.error(err);
+        return "Failed to fetch truth. Check your connection!";
+      }
     }
 
     async function getDare() {
-      const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
-      const data = await res.json();
-      return data.question;
+      try {
+        const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}&_=${Date.now()}`);
+        const data = await res.json();
+        return data.question || "No dare available.";
+      } catch (err) {
+        console.error(err);
+        return "Failed to fetch dare. Check your connection!";
+      }
     }
 
-    truthBtn.addEventListener("click", async () => {
+    truthBtn.addEventListener("click", () => handleTruth());
+    dareBtn.addEventListener("click", () => handleDare());
+
+    async function handleTruth() {
       disableButtons();
       result.innerHTML = "Fetching a truth... 🤔";
       const question = await getTruth();
       result.innerHTML = `<strong>Truth:</strong> ${question}`;
       enableButtons();
-    });
+    }
 
-    dareBtn.addEventListener("click", async () => {
+    async function handleDare() {
       disableButtons();
       result.innerHTML = "Fetching a dare... 😜";
       const question = await getDare();
       result.innerHTML = `<strong>Dare:</strong> ${question}`;
       enableButtons();
-    });
+    }
 
     function disableButtons() {
       truthBtn.disabled = true;
