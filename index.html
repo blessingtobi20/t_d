@@ -129,6 +129,15 @@
 
   <script>
     let rating = "pg"; // default mode
+
+    // --- Custom dares (18+ only) ---
+    const customDares = [
+      "Send a flirty text to your crush!",
+      "Do a silly sexy dance for 30 seconds!",
+      "Imitate a famous celebrity seductively!",
+      "Confess a funny guilty pleasure!"
+    ];
+
     const modeScreen = document.getElementById("modeScreen");
     const gameScreen = document.getElementById("gameScreen");
     const truthBtn = document.getElementById("truthBtn");
@@ -161,18 +170,18 @@
     }
 
     async function getDare() {
-  // Fetch a dare from the API
-  const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
-  const data = await res.json();
-  const apiDare = data.question;
+      // Fetch a dare from API
+      const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
+      const data = await res.json();
+      const apiDare = data.question;
 
-  // Combine API dare with custom dares
-  const allDares = [...customDares, apiDare];
+      // Include custom dares only if 18+ mode
+      const allDares = rating === "r" ? [...customDares, apiDare] : [apiDare];
 
-  // Pick a random dare from the combined list
-  const randomIndex = Math.floor(Math.random() * allDares.length);
-  return allDares[randomIndex];
-}
+      // Pick a random dare from the list
+      const randomIndex = Math.floor(Math.random() * allDares.length);
+      return allDares[randomIndex];
+    }
 
     truthBtn.addEventListener("click", async () => {
       disableButtons();
@@ -184,7 +193,7 @@
 
     dareBtn.addEventListener("click", async () => {
       disableButtons();
-      result.innerHTML = "Fetching a dare... 😜";
+      result.innerHTML = "Fetching a dare... 😈";
       const question = await getDare();
       result.innerHTML = `<strong>Dare:</strong> ${question}`;
       enableButtons();
