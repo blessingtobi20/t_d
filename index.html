@@ -1,182 +1,198 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Truth or Dare</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truth or Dare Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
 
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #1a1a2e;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        text-align: center;
-      }
-      button {
-        padding: 12px 25px;
-        margin: 10px;
-        border: none;
-        border-radius: 20px;
-        background: #ff0080;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      button:disabled {
-        opacity: 0.5;
-      }
-      .card {
-        margin-top: 20px;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        max-width: 400px;
-      }
-      .hidden {
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="modeScreen">
-      <h1>Truth or Dare</h1>
-      <button id="everyoneBtn">Everyone</button>
-      <button id="adultBtn">18+</button>
+    h1 {
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px #ff0080, 0 0 20px #7928ca;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff0080; }
+      to { text-shadow: 0 0 25px #7928ca, 0 0 30px #ff0080; }
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 15px 35px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(45deg, #ff0080, #7928ca);
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(255, 0, 128, 0.6);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(255, 0, 128, 0.9);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .card {
+      width: 80%;
+      max-width: 500px;
+      min-height: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      font-size: 1.3rem;
+      animation: fadeIn 0.5s ease;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.9rem;
+      opacity: 0.6;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mode selection screen -->
+  <div id="modeScreen">
+    <h1>Truth or Dare 🎯</h1>
+    <p style="margin-bottom: 20px;">Choose your game mode</p>
+    <div class="buttons">
+      <button id="everyoneBtn">Everyone 👨‍👩‍👧‍👦</button>
+      <button id="adultBtn">18+ 🔥</button>
     </div>
+  </div>
 
-    <div id="gameScreen" class="hidden">
-      <h1>Truth or Dare</h1>
-      <button id="truthBtn">Truth</button>
-      <button id="dareBtn">Dare</button>
-      <button id="backBtn">Change Mode</button>
-      <div class="card" id="result">Waiting...</div>
+  <!-- Main game screen -->
+  <div id="gameScreen" class="hidden">
+    <h1>Truth or Dare</h1>
+    <div class="buttons">
+      <button id="truthBtn">Truth 😏</button>
+      <button id="dareBtn">Dare 😈</button>
+      <button id="backBtn">⬅ Change Mode</button>
     </div>
+    <div class="card" id="result">Click a button to begin!</div>
+  </div>
 
-    <script>
-      /* ===============================
-         🔥 FIREBASE CONFIG (REPLACE)
-      ================================ */
-      const firebaseConfig = {
-        authDomain: "t-or-d-b3a7a.firebaseapp.com",
-        projectId: "t-or-d-b3a7a",
-        storageBucket: "t-or-d-b3a7a.firebasestorage.app",
-        messagingSenderId: "191762740910",
-        appId: "1:191762740910:web:24e2510f58d3df22fd9f3f",
-        measurementId: "G-34SLQN5HYE"
-      };
+  <div class="footer">Play with friends and have fun 🎉</div>
 
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
+  <script>
+    let rating = "pg"; // default mode
+    const modeScreen = document.getElementById("modeScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const truthBtn = document.getElementById("truthBtn");
+    const dareBtn = document.getElementById("dareBtn");
+    const backBtn = document.getElementById("backBtn");
+    const result = document.getElementById("result");
 
-      /* ===============================
-         🎯 YOUR OWN QUESTIONS
-         (EDIT THESE)
-      ================================ */
-      const customTruths = [
-        "What is your favorite hobby?",
-        "What makes you really happy?",
-        "What is one goal you have?"
-      ];
+    document.getElementById("everyoneBtn").addEventListener("click", () => {
+      rating = "pg";
+      modeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+    });
 
-      const customDares = [
-        "Do 5 jumping jacks",
-        "Smile for 10 seconds",
-        "Say something nice about someone"
-      ];
+    document.getElementById("adultBtn").addEventListener("click", () => {
+      rating = "r";
+      modeScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+    });
 
-      /* ===============================
-         🧠 GAME LOGIC
-      ================================ */
-      let rating = "pg";
+    backBtn.addEventListener("click", () => {
+      gameScreen.classList.add("hidden");
+      modeScreen.classList.remove("hidden");
+      result.innerHTML = "Click a button to begin!";
+    });
 
-      const modeScreen = document.getElementById("modeScreen");
-      const gameScreen = document.getElementById("gameScreen");
-      const result = document.getElementById("result");
+    async function getTruth() {
+      const res = await fetch(`https://api.truthordarebot.xyz/v1/truth?rating=${rating}`);
+      const data = await res.json();
+      return data.question;
+    }
 
-      document.getElementById("everyoneBtn").onclick = () => {
-        db.ref("game").set({ mode: "pg" });
-      };
+    async function getDare() {
+      const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
+      const data = await res.json();
+      return data.question;
+    }
 
-      document.getElementById("adultBtn").onclick = () => {
-        db.ref("game").set({ mode: "r" });
-      };
+    truthBtn.addEventListener("click", async () => {
+      disableButtons();
+      result.innerHTML = "Fetching a truth... 🤔";
+      const question = await getTruth();
+      result.innerHTML = `<strong>Truth:</strong> ${question}`;
+      enableButtons();
+    });
 
-      document.getElementById("backBtn").onclick = () => {
-        db.ref("game").remove();
-        gameScreen.classList.add("hidden");
-        modeScreen.classList.remove("hidden");
-      };
+    dareBtn.addEventListener("click", async () => {
+      disableButtons();
+      result.innerHTML = "Fetching a dare... 😜";
+      const question = await getDare();
+      result.innerHTML = `<strong>Dare:</strong> ${question}`;
+      enableButtons();
+    });
 
-      /* ===============================
-         📡 REAL-TIME LISTENERS
-      ================================ */
-      db.ref("game/mode").on("value", snap => {
-        if (!snap.exists()) return;
-        rating = snap.val();
-        modeScreen.classList.add("hidden");
-        gameScreen.classList.remove("hidden");
-      });
+    function disableButtons() {
+      truthBtn.disabled = true;
+      dareBtn.disabled = true;
+    }
 
-      db.ref("game/current").on("value", snap => {
-        if (!snap.exists()) return;
-        const data = snap.val();
-        result.innerHTML = `<strong>${data.type}:</strong> ${data.text}`;
-      });
-
-      /* ===============================
-         🌐 API FALLBACK
-      ================================ */
-      async function getApiTruth() {
-        const res = await fetch(`https://api.truthordarebot.xyz/v1/truth?rating=${rating}`);
-        const data = await res.json();
-        return data.question;
-      }
-
-      async function getApiDare() {
-        const res = await fetch(`https://api.truthordarebot.xyz/api/dare?rating=${rating}`);
-        const data = await res.json();
-        return data.question;
-      }
-
-      /* ===============================
-         🖱 BUTTON ACTIONS
-      ================================ */
-      document.getElementById("truthBtn").onclick = async () => {
-        let question;
-        if (customTruths.length > 0) {
-          question = customTruths.shift(); // use your own first
-        } else {
-          question = await getApiTruth();
-        }
-
-        db.ref("game/current").set({
-          type: "Truth",
-          text: question
-        });
-      };
-
-      document.getElementById("dareBtn").onclick = async () => {
-        let question;
-        if (customDares.length > 0) {
-          question = customDares.shift(); // use your own first
-        } else {
-          question = await getApiDare();
-        }
-
-        db.ref("game/current").set({
-          type: "Dare",
-          text: question
-        });
-      };
-    </script>
-  </body>
+    function enableButtons() {
+      setTimeout(() => {
+        truthBtn.disabled = false;
+        dareBtn.disabled = false;
+      }, 2000);
+    }
+  </script>
+</body>
 </html>
